@@ -7,8 +7,11 @@ def get_points(img):
     print(img)
     image = cv2.imread(img,cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
+    
     gray = cv2.bilateralFilter(gray, 13, 15, 15)
+    
     edged = cv2.Canny(gray, 30,150) #Perform Edge detection
+    
     # cv2.imshow('edged',edged)
     # cv2.waitKey(0)
 
