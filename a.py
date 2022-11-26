@@ -8,8 +8,8 @@ img_path ="photo/"+sys.argv[1]
 # img_path="photo/"+input("請輸入照片檔名(會自動填入路徑)：")
 image = cv2.imread(img_path, cv2.IMREAD_COLOR)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-# image=cv2.GaussianBlur(image,(5,5),2)
-image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY, 11, 8)
+image=cv2.GaussianBlur(image,(5,5),10)
+ret, image = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
 
 t1=time.monotonic()
 

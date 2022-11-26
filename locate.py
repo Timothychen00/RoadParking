@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import imutils
 
-
 def get_points(img):
     print(img)
     image = cv2.imread(img,cv2.IMREAD_COLOR)
@@ -32,7 +31,7 @@ def get_points(img):
     print("位置")
     print(screenCnt)
 
-    print(type(screenCnt),screenCnt,screenCnt.shape)
+    # print(type(screenCnt),screenCnt,screenCnt.shape)
     temp=[]
     for i in range(4):
         temp.append((screenCnt[i][0][0],screenCnt[i][0][1]))
