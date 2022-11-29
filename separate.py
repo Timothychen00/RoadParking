@@ -6,13 +6,13 @@ path='output.png'
 def cut(path):
     image= cv2. imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-    # cv2.imshow('',image)
-    # cv2.waitKey(0)
+    cv2.imshow('',image)
+    cv2.waitKey(0)
     image=cv2.GaussianBlur(image,(5,5),10)
-    # cv2.imshow('1',image)
-    # cv2.waitKey(0)
-    ret, image = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
-
+    cv2.imshow('1',image)
+    cv2.waitKey(0)
+    image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+    # cv2.adaptiveThreshold(image,)
 
     print(image)
     # cv2.imshow('origin_image',image)
@@ -65,39 +65,39 @@ def cut(path):
     temp_x=[0]*width
     temp_x_position=[0]
     times=0
-    print(width/8)
+    print(width/8,width/10)
     for i in range(0,len(black_point_x)):
         if black_point_x[i]<black_min_x :
             if times>=1:
                 print(i,temp_x_position[times])
-                if i-temp_x_position[times]>width/8 :
+                if i-temp_x_position[times]>width/8 and i>width/10 and i<width-width/10:
                     temp_x[i]=i
                     temp_x_position.append(i)
                     times+=1
-            else:
+            elif i>width/10 and i<width-width/10:
                 temp_x_position.append(i)
                 times+=1
             
     print('tempx:',temp_x)
     print('tempx_position',temp_x_position)
 
-    # # line (x,y)
-    # for i in temp_x_position[1:]:
-    #     print(i)
-    #     cv2.line(image_color, (i,0), (i,height), (0, 0, 255),1)
+    # line (x,y)
+    for i in temp_x_position[1:]:
+        print(i)
+        cv2.line(image_color, (i,0), (i,height), (0, 0, 255),1)
 
     value = numpy.array(white_point_x)
     label = numpy.array(range(len(white_point_x)))
     valueb = numpy.array(black_point_x)
     labelb = numpy.array(range(len(black_point_x)))
     print()
-    # print(white_point_x)
-    # plt.bar(label, value)
-    # plt.show()
-    # plt.bar(labelb, valueb)
-    # plt.show()
-    # cv2.imshow('213123',image_color)
-    # cv2.waitKey(0)
+    print(white_point_x)
+    plt.bar(label, value)
+    plt.show()
+    plt.bar(labelb, valueb)
+    plt.show()
+    cv2.imshow('213123',image_color)
+    cv2.waitKey(0)
     # cv2.imwrite('output2.png', image_binary)
 
 
@@ -110,31 +110,3 @@ def cut(path):
 
 
 
-
-
-
-
-
-
-
-    # def capture(y_min,y_max,x_min,x_max,img):
-    #     cv2.imshow('',image_binary)
-    #     cv2.waitKey(0)
-    #     # print(y_min,y_max,x_min,x_max)
-    #     tempy=img[y_min:y_max+1]
-    #     tempx=numpy.array([])
-    #     for i in tempy:
-    #         temp=numpy.array(i[x_min:x_max+1])
-    #         tempx=numpy.append(tempx,temp)
-    #         # print(temp)
-            
-    #     # print('',tempx,tempx.shape)
-    #     tempx=numpy.reshape(tempx,(x_max-x_min+1,y_max-y_min))
-    #     # print(tempx)
-    #     # print(type(tempx))
-    #     # print(type(tempx.shape))
-    #     cv2.imshow('1',tempx)
-    #     cv2.waitKey(0)
-        
-    # for i in range(len(temp_x_position[1:])):
-    #     capture(0,height,temp_x_position[i],temp_x_position[i+1],image_binary)
