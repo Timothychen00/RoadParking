@@ -9,25 +9,27 @@ def get_points(img):
     image = cv2.imread(img,cv2.IMREAD_COLOR)
     cv2.imshow('edged',image)
     cv2.waitKey(0)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-    
-    gray = cv2.bilateralFilter(gray, 13, 15, 15)
 
-    blur = cv2.blur(gray, (15, 15))
+    gray_img=cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+    GaussianBlur_img=cv2.GaussianBlur(gray_img,(3,3),0)
+    Sobel_img=cv2.Sobel(GaussianBlur_img,-1,1,0,ksize=3)
+    ret,binary_img=cv2.threshold(Sobel_img,127,255,cv2.THRESH_BINARY)
 
-    # cv2.imshow('blur',blur)
-    # cv2.waitKey(0)
+    kernel=np.ones((5,15),np.uint8)
 
-    kernel = np.ones((10,10), np.uint8)
+  
+
+    close_img=cv2.morphologyEx(binary_img,cv2.MORPH_CLOSE,kernel)
+    open_img=cv2.morphologyEx(close_img,cv2.MORPH_OPEN,kernel)
+
+    element=cv2.getStructuringElement(cv2.MORPH_RECT,(10,10))
+    dilation_img=cv2.dilate(open_img,element,iterations=3)
+
     
-    erosion = cv2.erode(blur, kernel, iterations = 1)
-    
-    edged = cv2.Canny(erosion, 30,150) #Perform Edge detection
-    
-    cv2.imshow('edged',edged)
+    cv2.imshow('edged',dilation_img)
     cv2.waitKey(0)
 
-    contours=cv2.findContours(edged.copy(),cv2.RETR_TREE,
+    contours=cv2.findContours(dilation_img.copy(),cv2.RETR_TREE,
                                                 cv2.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours(contours)
     contours = sorted(contours,key=cv2.contourArea, reverse = True)[:]

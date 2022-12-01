@@ -15,17 +15,34 @@ def get_points(img):
 
     blur = cv2.blur(gray, (15, 15))
 
-    # cv2.imshow('blur',blur)
-    # cv2.waitKey(0)
+    # # cv2.imshow('blur',blur)
+    # # cv2.waitKey(0)
 
-    kernel = np.ones((10,10), np.uint8)
-    
+
+    kernel = np.ones((5,5), np.uint8)
     erosion = cv2.erode(blur, kernel, iterations = 1)
-    
-    edged = cv2.Canny(erosion, 30,150) #Perform Edge detection
-    
+
+    ret, output = cv2.threshold(erosion, 230, 255, cv2.THRESH_BINARY)
+
+    cv2.imshow('edged',output)
+    cv2.waitKey(0)
+
+    edged = cv2.Canny(output, 30,150) #Perform Edge detection
+
+        
     cv2.imshow('edged',edged)
     cv2.waitKey(0)
+
+    # close_img=cv2.morphologyEx(edged,cv2.MORPH_CLOSE,kernel)
+    # open_img=cv2.morphologyEx(close_img,cv2.MORPH_OPEN,kernel)
+
+    # element=cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+    # dilation_img=cv2.dilate(open_img,element,iterations=3)
+
+    
+    # cv2.imshow('edged',dilation_img)
+    # cv2.waitKey(0)
+    
 
     contours=cv2.findContours(edged.copy(),cv2.RETR_TREE,
                                                 cv2.CHAIN_APPROX_SIMPLE)

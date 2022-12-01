@@ -1,10 +1,10 @@
-from locate import get_points
+from locate3 import get_points
 from imutils.perspective import four_point_transform
 import cv2,sys,time
 import numpy as np
 
 
-img_path ="1128/"+sys.argv[1]
+img_path ="crop/"+sys.argv[1]
 # img_path="photo/"+input("請輸入照片檔名(會自動填入路徑)：")
 image = cv2.imread(img_path, cv2.IMREAD_COLOR)
 # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
