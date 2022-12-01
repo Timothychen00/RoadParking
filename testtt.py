@@ -2,30 +2,68 @@ import cv2
 import pytesseract
 from separate import cut
 import sys,time
+import numpy as np
 whitelist1='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
 whitelist_num='0123456789'
 whitelist_eng='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-position,img=cut('output/capture(9)-cut.png')
+position,img=cut('output/fuck.png')
 cv2.imshow('origin',img)
 cv2.waitKey(0)
-
 
 hImg, wImg=img.shape
 pytesseract.pytesseract.tesseract_cmd=r'tesseract'
 
 
+position=position[1:]
 t1=time.monotonic()
+result=[]
+print(position)
+for i in range(len(position)+1):
+    k=1
+    # print(position[i])
+    if i==0:
+        k=img[0:hImg,3:position[i]]
+    elif i==len(position):
+        k=img[0:hImg,position[i-1]:]
+    else:
+        k=img[0:hImg,position[i-1]:position[i]]
+    # cv2.imshow('a',k)   
+    # cv2.waitKey(0)
+    kernel = np.ones((3,3), np.uint8)
+    
+    # k=cv2.GaussianBlur(k,(5,5),14)
+    # cv2.imshow('ero',k)
+    # cv2.waitKey(0)
+    # k = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+    # cv2.imshow('ero',k)
+    # cv2.waitKey(0)
+    
+    k = cv2.dilate(k, kernel, iterations = 1)
+    cv2.imshow('ero',k)
+    cv2.waitKey(0)
+    k = cv2.erode(k, kernel, iterations = 3)
+    cv2.imshow('ero',k)
+    cv2.waitKey(0)
+    
+    k = cv2.dilate(k, kernel, iterations = 1)
+    cv2.imshow('ero',k)
+    cv2.waitKey(0)
+    
 
-for i in range(len(position)):
-    if i==1:
-        cv2.imshow('a',img[0:hImg,0:position[i]])
-        cv2.waitKey(0)
-        print(pytesseract.image_to_string(img[0:hImg,0:position[i]],lang='eng',config =f'--oem 3 --psm 8 -c tessedit_char_whitelist={whitelist_eng}'))
 
-
-
-
+    k= np.pad(k, ((2, 2), (20, 20)), 'constant', constant_values=(255, 255))
+    cv2.imshow('a',k)
+    cv2.waitKey(0)
+    cv2.imwrite('a.png',k)
+    
+    result.append(pytesseract.image_to_string(k,lang='eng',config =f'--oem 1 --psm 10 -c tessedit_char_whitelist={whitelist1}').replace('\n',''))
+    
+ 
+print(result)
+print("執行時間：",time.monotonic()-t1)
+# exit(0)
+t1=time.monotonic()
 def get_data(whitelist,img,x_start,x_end):
     boxes = pytesseract.image_to_boxes (img[0:hImg,x_start:x_end],lang='eng',config =f'--oem 3 --psm 8 -c tessedit_char_whitelist={whitelist}')
     temp=[]
