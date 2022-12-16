@@ -2,16 +2,15 @@ import cv2,sys,time
 import numpy
 import matplotlib.pyplot as plt
 
-path='output.png'
+path='output_crop.png'
 def cut(path):
-    image= cv2. imread(path)
+    image= cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-    cv2.imshow('',image)
-    cv2.waitKey(0)
+    # cv2.imshow('',image)
+    # cv2.waitKey(0)
     image=cv2.GaussianBlur(image,(5,5),14)
-    cv2.imshow('1',image)
-    cv2.waitKey(0)
-    image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+    # image = cv2.adaptiveThreshold(output, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+    _, image = cv2.threshold(image,127,255,cv2.THRESH_BINARY)
     # cv2.adaptiveThreshold(image,)     
 
     print(image)
@@ -27,8 +26,6 @@ def cut(path):
     black_point_y=numpy.count_nonzero(image ==0, axis=1)
     black_max_y=numpy.max(black_point_y)
     print('bk',black_max_y*0.1,black_point_y)
-
-
 
     temp=[0,0]
     #垂直切y
@@ -46,8 +43,8 @@ def cut(path):
     print('temp',temp)
 
 
-    plt.imshow(image_color)
-    plt.show()
+    # plt.imshow(image_color)
+    # plt.show()
 
     cv2.line(image_color, (0,temp[0]), (width,temp[0]), (0, 0, 255),1)
     cv2.line(image_color, (0,temp[1]), (width,temp[1]), (0, 0, 255),1)
@@ -56,8 +53,8 @@ def cut(path):
     image_color=image_color[temp[0]+1:temp[1]]
     image_binary=image[temp[0]+1:temp[1]]
 
-    plt.imshow(image_color)
-    plt.show()
+    # plt.imshow(image_color)
+    # plt.show()
 
     height=image_binary.shape[0]
     width=image_binary.shape[1]
@@ -98,27 +95,27 @@ def cut(path):
     print(white_point_x)
  
     
-    plt.subplot(2,2,1)
-    plt.title('white_y')
-    plt.bar(numpy.array(range(len(white_point_y))), numpy.array(white_point_y))
+    # plt.subplot(2,2,1)
+    # plt.title('white_y')
+    # plt.bar(numpy.array(range(len(white_point_y))), numpy.array(white_point_y))
     
-    plt.subplot(2,2,2)
-    plt.title('black_y')
-    plt.bar(numpy.array(range(len(black_point_y))), numpy.array(black_point_y))
+    # plt.subplot(2,2,2)
+    # plt.title('black_y')
+    # plt.bar(numpy.array(range(len(black_point_y))), numpy.array(black_point_y))
     
-    plt.subplot(2,2,3)
-    plt.title('white_x')
-    plt.bar(numpy.array(range(len(white_point_x))), numpy.array(white_point_x))
+    # plt.subplot(2,2,3)
+    # plt.title('white_x')
+    # plt.bar(numpy.array(range(len(white_point_x))), numpy.array(white_point_x))
     
-    plt.subplot(2,2,4)
-    plt.title('black_x')
-    plt.bar(numpy.array(range(len(black_point_x))), numpy.array(black_point_x))
+    # plt.subplot(2,2,4)
+    # plt.title('black_x')
+    # plt.bar(numpy.array(range(len(black_point_x))), numpy.array(black_point_x))
     
-    plt.show()
+    # plt.show()
     
     
-    cv2.imshow('213123',image_color)
-    cv2.waitKey(0)
+    # cv2.imshow('213123',image_color)
+    # cv2.waitKey(0)
     # cv2.imwrite('output2.png', image_binary)
     
 

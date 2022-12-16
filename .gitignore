@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+yolov4/checkpoints/custom-fp16.tflite
