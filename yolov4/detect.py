@@ -35,10 +35,12 @@ flags.DEFINE_boolean('plate', False, 'perform license plate recognition')
 weights='yolov4/checkpoints/custom-fp16.tflite'
 
 #load model
+# if __name__=='__main__':
 interpreter = tf.lite.Interpreter(model_path=weights)
 
 
 def main(images,input_size=416,output='',plate=False):
+    print('\033[91m','yolo start','\033[0m')
     t1=time.monotonic()
     # config = ConfigProto()
     # config.gpu_options.allow_growth = True
@@ -72,9 +74,9 @@ def main(images,input_size=416,output='',plate=False):
         interpreter.invoke()
         pred = [interpreter.get_tensor(output_details[i]['index']) for i in range(len(output_details))]
         
-        print(pred)
+        # print(pred)
         
-        print(pred[0][0][0][:4])
+        # print(pred[0][0][0][:4])
         boxes=[]
         pred_conf=[]
         for i in pred[0][0]:
@@ -127,6 +129,8 @@ def main(images,input_size=416,output='',plate=False):
         print("spend_time:",t2-t1,'s')
         # cv2.imwrite(output+ str(count) + '.png', image)
         cv2.imwrite('output_origin.png', image)
+    print('\033[91m','yolo end','\033[0m')
+
 
 if __name__ == '__main__':
     try:

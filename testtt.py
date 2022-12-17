@@ -8,6 +8,7 @@ whitelist_num='0123456789'
 whitelist_eng='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 def recognize():
+    print('')
     position,img=cut('output_crop.png')
     hImg, wImg=img.shape
     pytesseract.pytesseract.tesseract_cmd=r'tesseract'
@@ -83,8 +84,8 @@ def recognize():
         #         print('左邊:',left[:-1])
         #         print('右邊：',get_data(whitelist_eng,img,w,wImg))
         #         # break
-    print(left)
-    print(''.join(left))
+    # print(left)
+    # print(''.join(left))
     print("執行時間：",time.monotonic()-t1)
     return ''.join(left)
     
