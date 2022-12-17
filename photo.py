@@ -28,30 +28,40 @@ async def get_photo(ip,name):
                             await f.close()
                         else:
                             pass
+        return 'hh2'
     except:
-        pass
-                
+        return 'hh'
+
 async def main():
     # 建立 Task 列表
     tasks = []
     for i in devices:
-        tasks.append(asyncio.create_task(get_photo(devices[i][0],i)))
+        task=asyncio.create_task(get_photo(devices[i][0],i))
+        # task.add_done_callback(print(task.result))
+        tasks.append(task)
+        
+        
+    for k in tasks:
+        await k
+        print(k.result())
+
+        
         # 執行所有 Tasks
 
     # 輸出結果
-    
+
     try:
         await asyncio.wait(tasks, timeout=2)
     except TimeoutError:
         print('The task was cancelled due to a timeout')
-        
+
 
 ts=0
 while True:
     te=time.monotonic()
     if te-ts>1 or ts==0:
         asyncio.run(main())
-        
+
         msg=[]
         for i in devices:
             msg.append([{"mac":i},{"status":devices[i][1]}])
