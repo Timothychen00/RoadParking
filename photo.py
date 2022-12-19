@@ -58,7 +58,7 @@ async def get_photo(ip,name):
         return ['err','',name]
     
 def image_callback(result):# input for a dict(result,mac)
-    
+    print('\t[SUB-PROCESS] recognize result:',result)
     err=[]
     if result['str']:
         if len(result['str'])<=7:
@@ -68,17 +68,17 @@ def image_callback(result):# input for a dict(result,mac)
     else:
         err.append('non_return')
     
+    print('\t[SUB-PROCESS] recognize error:',result)
     if len(err)>0: #有錯誤的發生
         #錯誤處理
         msg=[{'mac':result['mac']},{'error':err}]
-        send(msg,'Parking')# update parking errors
+    else:
+        msg=[{'mac':result['mac']},{'license_plate':result['str'],'status':'inuse'}]
+        
+    print('\t[SUB-PROCESS] Parking image type send:',result)
+    send(msg,'Parking')# update parking errors
 
     # print('recognized:',input)
-    
-        
-        # 執行所有 Tasks
-
-    # 輸出結果
     
 async def main():
     # 建立 Task 列表
@@ -89,13 +89,13 @@ async def main():
         tasks.append(task)
 
     for k in tasks:
-        # await k
+        await k
         result=k.result()# if get one ->do one
         print('\t\033[93m[SUB-PROCESS] task_result',result,'\033[0m')
         if result[0]=='image':
             # print('fuck')
             Pool.apply_async(yolov4.detect.main,args=('output/'+result[2]+'.jpeg',),callback=print,error_callback=print)
-            Pool.apply_async(testtt.recognize,args=(result[2],),callback=print,error_callback=print)
+            Pool.apply_async(testtt.recognize,args=(result[2],),callback=image_callback,error_callback=print)
         elif result[0]=='text':
             if result[1]=='There\'s a car inside':#inuse
                 msg=[{'mac':result['mac']},{'status':'inuse'}]
