@@ -34,7 +34,7 @@ def count_objects(data, by_class = False, allowed_classes = list(read_class_name
     return counts
 
 # function for cropping each detection and saving as new image
-def crop_objects(img, data, path, allowed_classes):
+def crop_objects(img, data, path, allowed_classes,name):
     boxes, scores, classes, num_objects = data
     class_names = read_class_names(cfg.YOLO.CLASSES)
     #create dictionary to hold count of objects for image name
@@ -51,7 +51,7 @@ def crop_objects(img, data, path, allowed_classes):
             cropped_img = img[int(ymin)-5:int(ymax)+5, int(xmin)-5:int(xmax)+5]
             # construct image name and join it to path for saving crop properly
             # img_name = class_name + '_' + str(counts[class_name]) + '.png'
-            img_name = 'output_crop.png'
+            img_name = name+'_crop.png'
             img_path = os.path.join(path, img_name )
             # save image
             cv2.imwrite(img_path, cropped_img)

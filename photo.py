@@ -9,11 +9,8 @@ import multiprocessing
 from threading import Thread
 import testtt
 
-
-devices={'8:B6:1F:39:B2:FC':["0.0.0.0","lost"],'44:17:93:7E:3B:7C':["0.0.0.0","lost"],'8:B6:1F:39:AF:20':['0.0.0.0','lost']}
-devices=update_ip(devices)
-print('updated:\n',devices)
-
+devices={'8:B6:1F:39:B2:FC':["0.0.0.0","lost"],'44:17:93:7E:3B:7C':["192.168.92.35","lost"],'8:B6:1F:39:AF:20':['0.0.0.0','lost']}
+# devices=update_ip(devices)
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -32,14 +29,14 @@ devices_color={
 }
 async def get_photo(ip,name):
     global devices
-    print(devices_color[name],'get_photo:',name,ip,bcolors.ENDC)
+    print('[MAIN-PROCESS]',devices_color[name],'get_photo:',name,ip,bcolors.ENDC)
     for i in devices:
         devices[i][1]="lost"
     try:
         # print(name)
         async with async_timeout.timeout(2):
             async with aiohttp.ClientSession() as session:
-                async with session.get("http://"+ip+"/check") as resp:
+                async with session.get("http://"+ip+"/capture?") as resp:
                     # print(resp.headers['Content-Type'])
 
                     if resp.status == 200:
@@ -49,13 +46,40 @@ async def get_photo(ip,name):
                             f = await aiofiles.open("output/"+str(name)+".jpeg", mode='wb')
                             await f.write(await resp.read())
                             await f.close()
+                            print('[MAIN-PROCESS]',devices_color[name],'get_photo',name,'done',bcolors.ENDC,'image')
                             return ['image','',name]
                         else:
                             return ['text',await resp.read(),name]
     except:
-        print(devices_color[name],'get_photo',name,'done',bcolors.ENDC)
+        if name=='44:17:93:7E:3B:7C':
+            print('fuck')
+            asyncio.sleep(2)
+        print('[MAIN-PROCESS]',devices_color[name],'get_photo',name,'done',bcolors.ENDC,'err')
         return ['err','',name]
+    
+def image_callback(result):# input for a dict(result,mac)
+    
+    err=[]
+    if result['str']:
+        if len(result['str'])<=7:
+            err.append('length_error')
+        if '-' not in result['str']:
+            err.append('pattern_error')
+    else:
+        err.append('non_return')
+    
+    if len(err)>0: #有錯誤的發生
+        #錯誤處理
+        msg=[{'mac':result['mac']},{'error':err}]
+        send(msg,'Parking')# update parking errors
 
+    # print('recognized:',input)
+    
+        
+        # 執行所有 Tasks
+
+    # 輸出結果
+    
 async def main():
     # 建立 Task 列表
     tasks = []
@@ -63,42 +87,39 @@ async def main():
         task=asyncio.create_task(get_photo(devices[i][0],i))
         # task.add_done_callback(print(task.result))
         tasks.append(task)
-        
-    images=[]
+
     for k in tasks:
-        await k
-        result=k.result()
+        # await k
+        result=k.result()# if get one ->do one
+        print('\t\033[93m[SUB-PROCESS] task_result',result,'\033[0m')
         if result[0]=='image':
-            images.append(result[2])
+            # print('fuck')
+            Pool.apply_async(yolov4.detect.main,args=('output/'+result[2]+'.jpeg',),callback=print,error_callback=print)
+            Pool.apply_async(testtt.recognize,args=(result[2],),callback=print,error_callback=print)
         elif result[0]=='text':
-            if result[1]=='There\'s a car inside':
+            if result[1]=='There\'s a car inside':#inuse
+                msg=[{'mac':result['mac']},{'status':'inuse'}]
+            else:#empty
+                msg=[{'mac':result['mac']},{'status':'empty'}]
                 
-            #update text
-            pass
-                
-        print(k.result())
-    return images           #need to process
+    return            #need to process
 
-
-        
-        # 執行所有 Tasks
-
-    # 輸出結果
 
 if __name__=='__main__':# main time loop
+    print('updated:\n',devices)
     Pool=multiprocessing.Pool(processes=1)
     
     ts=0
     while True:
         te=time.monotonic()
-        if te-ts>1 or ts==0:
+        if te-ts>20 or ts==0:
+            print('[MAIN-PROCESS]-'*20)
             result=asyncio.run(main())
-            print(result)
-            Pool.apply_async(yolov4.detect.main,args=('yolov4/data/images/capture.jpg'),callback=print('fuck'))
+            
             msg=[]
             for i in devices:
                 msg.append([{"mac":i},{"status":devices[i][1]}])
-            print(msg)
+            print('[MAIN-PROCESS] send:',msg)
             msg=json.dumps(msg)
             send(msg)# send to mqtt
             ts=te

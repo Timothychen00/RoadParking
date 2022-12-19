@@ -7,15 +7,16 @@ whitelist1='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
 whitelist_num='0123456789'
 whitelist_eng='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-def recognize():
-    print('')
-    position,img=cut('output_crop.png')
+def recognize(name):
+    # print('')
+    print(name+'_crop.png')
+    position,img=cut(name+'_crop.png')
     hImg, wImg=img.shape
     pytesseract.pytesseract.tesseract_cmd=r'tesseract'
     position=position[1:]
     t1=time.monotonic()
     result=[]
-    print(position)
+    # print(position)
     for i in range(len(position)+1):
         k=1
         # print(position[i])
@@ -47,8 +48,8 @@ def recognize():
         
     
     print(result)
-    print("執行時間：",time.monotonic()-t1)
-    # exit(0)
+    # print("執行時間：",time.monotonic()-t1)
+    # # exit(0)
     t1=time.monotonic()
     def get_data(whitelist,img,x_start,x_end):
         boxes = pytesseract.image_to_boxes (img[0:hImg,x_start:x_end],lang='eng',config =f'--oem 3 --psm 8 -c tessedit_char_whitelist={whitelist}')
@@ -64,7 +65,7 @@ def recognize():
     boxes = pytesseract.image_to_boxes (img,lang='eng',config =f'--oem 3 --psm 8 -c tessedit_char_whitelist={whitelist1}')
     for b in boxes.splitlines():
         b= b.split(' ')
-        print(b)
+        # print(b)
         x, y, w, h= int (b[1]), int (b[2]), int (b[3]) ,int(b[4])
         cv2.rectangle(img,(x, hImg-y),(w, hImg-h), (0, 0, 255), 2)
         left.append(b[0])
@@ -84,10 +85,12 @@ def recognize():
         #         print('左邊:',left[:-1])
         #         print('右邊：',get_data(whitelist_eng,img,w,wImg))
         #         # break
-    # print(left)
+    print('Finish')
+    
     # print(''.join(left))
     print("執行時間：",time.monotonic()-t1)
-    return ''.join(left)
+    # print(''.join(left))
+    return {"str":''.join(left),'mac':name}
     
 
 

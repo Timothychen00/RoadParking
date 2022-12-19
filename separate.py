@@ -13,25 +13,25 @@ def cut(path):
     _, image = cv2.threshold(image,127,255,cv2.THRESH_BINARY)
     # cv2.adaptiveThreshold(image,)     
 
-    print(image)
+    # # print(image)
     # cv2.imshow('origin_image',image)
     # cv2.waitKey(0)
     # 圖片的座標是y，x
     height=image.shape[0]
     width=image.shape[1]
-    print(image)
+    # print(image)
 
     white_point_y=numpy.count_nonzero(image ==255, axis=1)
     white_max_y=white_point_y.max()
     black_point_y=numpy.count_nonzero(image ==0, axis=1)
     black_max_y=numpy.max(black_point_y)
-    print('bk',black_max_y*0.1,black_point_y)
+    # print('bk',black_max_y*0.1,black_point_y)
 
     temp=[0,0]
     #垂直切y
     for i in range(len(white_point_y)):
         if white_point_y[i]>white_max_y*0.7 and( i>5 or i< height-5) and black_point_y[i]<black_max_y*0.1   :
-            print('1-',i)
+            # print('1-',i)
             if i<=len(image)/2:
                 temp[0]=i-15
             else:
@@ -40,7 +40,7 @@ def cut(path):
 
         
     image_color = cv2.imread(path, cv2.IMREAD_COLOR)
-    print('temp',temp)
+    # print('temp',temp)
 
 
     # plt.imshow(image_color)
@@ -70,11 +70,11 @@ def cut(path):
     temp_x=[0]*width
     temp_x_position=[0]
     times=0
-    print(width/8,width/10)
+    # print(width/8,width/10)
     for i in range(0,len(black_point_x)):
         if black_point_x[i]<black_min_x :
             if times>=1:
-                print(i,temp_x_position[times])
+                # print(i,temp_x_position[times])
                 if i-temp_x_position[times]>width/8 and i>width/10 and i<width-width/10:
                     temp_x[i]=i
                     temp_x_position.append(i)
@@ -83,16 +83,16 @@ def cut(path):
                 temp_x_position.append(i)
                 times+=1
             
-    print('tempx:',temp_x)
-    print('tempx_position',temp_x_position)
+    # print('tempx:',temp_x)
+    # print('tempx_position',temp_x_position)
 
     # line (x,y)
     for i in temp_x_position[1:]:
-        print(i)
+        # print(i)
         cv2.line(image_color, (i,0), (i,height), (0, 0, 255),1)
 
-    print()
-    print(white_point_x)
+    # print()
+    # print(white_point_x)
  
     
     # plt.subplot(2,2,1)
@@ -115,10 +115,9 @@ def cut(path):
     
     
     # cv2.imshow('213123',image_color)
+    cv2.imwrite('separare.png', image_color)
     # cv2.waitKey(0)
     # cv2.imwrite('output2.png', image_binary)
-    
-
     return temp_x_position,image_binary
 
 

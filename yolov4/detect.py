@@ -40,7 +40,7 @@ interpreter = tf.lite.Interpreter(model_path=weights)
 
 
 def main(images,input_size=416,output='',plate=False):
-    print('\033[91m','yolo start','\033[0m')
+    print('\033[91m','yolo start','\033[0m',flush = True)
     t1=time.monotonic()
     # config = ConfigProto()
     # config.gpu_options.allow_growth = True
@@ -82,12 +82,12 @@ def main(images,input_size=416,output='',plate=False):
         for i in pred[0][0]:
             boxes.append(i[:4])
             pred_conf.append(i[4:])
-        print(np.array(boxes,dtype='float32'))
-        print(np.array(pred_conf,dtype='float32'))
-            # boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25, input_shape=tf.constant([input_size, input_size]))
+        # print(np.array(boxes,dtype='float32'))
+        # print(np.array(pred_conf,dtype='float32'))
+        #     # boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25, input_shape=tf.constant([input_size, input_size]))
 
-        # run non max suppression on detections
-        print(boxes)
+        # # run non max suppression on detections
+        # print(boxes)
         boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
             boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
             scores=tf.reshape(
@@ -113,8 +113,8 @@ def main(images,input_size=416,output='',plate=False):
 
         # if crop flag is enabled, crop each detection and save it as new image
         crop_path = os.path.join(os.getcwd())
-        
-        crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox, crop_path, allowed_classes)
+        print(image_name)
+        crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox, crop_path, allowed_classes,image_name)
         
         counted_classes = count_objects(pred_bbox, by_class = False, allowed_classes=allowed_classes)
         print(counted_classes)
