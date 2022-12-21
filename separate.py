@@ -1,5 +1,6 @@
 import cv2,sys,time
 import numpy
+import math
 import matplotlib.pyplot as plt
 
 path='output_crop.png'
@@ -9,20 +10,27 @@ def cut(path):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
         # cv2.imshow('',image)
         # cv2.waitKey(0)
-        image=cv2.GaussianBlur(image,(5,5),14)
-        # image = cv2.adaptiveThreshold(output, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+        # cv2.imshow('origin_image',image)
+        # cv2.waitKey(0)
+        
+        image=cv2.GaussianBlur(image,(5,5),20)
+        # cv2.imshow('origin_image',image)
+        # cv2.waitKey(0)
+        # image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+        # image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,11,2)
+        # image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,11,3)
+        
         _, image = cv2.threshold(image,127,255,cv2.THRESH_BINARY)
-        # cv2.adaptiveThreshold(image,)     
 
-        # # print(image)
+        # # # print(image)
         # cv2.imshow('origin_image',image)
         # cv2.waitKey(0)
         # 圖片的座標是y，x
         height=image.shape[0]
         width=image.shape[1]
-        # print(image)
+        # print(image) 
 
-        white_point_y=numpy.count_nonzero(image ==255, axis=1)
+        white_point_y=numpy.count_nonzero(image >=200, axis=1)
         white_max_y=white_point_y.max()
         black_point_y=numpy.count_nonzero(image ==0, axis=1)
         black_max_y=numpy.max(black_point_y)
@@ -31,7 +39,7 @@ def cut(path):
         temp=[0,0]
         #垂直切y
         for i in range(len(white_point_y)):
-            if white_point_y[i]>white_max_y*0.7 and( i>5 or i< height-5) and black_point_y[i]<black_max_y*0.1   :
+            if white_point_y[i]>white_max_y*0.7 and( i>5 or i< height-5) and black_point_y[i]<black_max_y*0.15   :
                 # print('1-',i)
                 if i<=len(image)/2:
                     temp[0]=i-15
@@ -89,12 +97,8 @@ def cut(path):
 
         # line (x,y)
         for i in temp_x_position[1:]:
-            # print(i)
             cv2.line(image_color, (i,0), (i,height), (0, 0, 255),1)
 
-        # print()
-        # print(white_point_x)
-    
         
         # plt.subplot(2,2,1)
         # plt.title('white_y')
@@ -114,13 +118,14 @@ def cut(path):
         
         # plt.show()
         # cv2.imshow('213123',image_color)
-        cv2.imwrite('separare.png', image_color)
+        # cv2.imwrite('separare.png', image_color)
         # cv2.waitKey(0)
-        # cv2.imwrite('output2.png', image_binary)
+        # print(image_color)
+        cv2.imwrite('output2.png', image_color)
         return temp_x_position,image_binary
     except Exception as e:
         print('\033[91mSeparate Except',str(e),'\033[0m')
-        return None,None
+        return None,image_binary
 
 
 

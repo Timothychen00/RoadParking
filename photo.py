@@ -4,13 +4,11 @@ from mqtt_send import send
 from network_scan import update_ip
 import yolov4.detect
 import time
-from concurrent.futures import ProcessPoolExecutor
 import multiprocessing
-from threading import Thread
 import testtt
 
 devices={'8:B6:1F:39:B2:FC':["0.0.0.0","lost"],'44:17:93:7E:3B:7C':["192.168.92.35","lost"],'8:B6:1F:39:AF:20':['0.0.0.0','lost']}
-# devices=update_ip(devices)
+devices=update_ip(devices)
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -36,8 +34,8 @@ async def get_photo(ip,name):
         # print(name)
         async with async_timeout.timeout(2):
             async with aiohttp.ClientSession() as session:
-                async with session.get("http://"+ip+"/capture?") as resp:
-                    # print(resp.headers['Content-Type'])
+                async with session.get("http://"+ip+"/check") as resp:
+                    print(resp.headers['Content-Type'])
 
                     if resp.status == 200:
                         devices[name][1]="alive"
@@ -50,10 +48,10 @@ async def get_photo(ip,name):
                             return ['image','',name]
                         else:
                             return ['text',await resp.read(),name]
+                    else:
+                        return ['err','400']
     except:
-        if name=='44:17:93:7E:3B:7C':
-            print('fuck')
-            asyncio.sleep(2)
+        # if name=='44:17:93:7E:3B:7C':
         print('[MAIN-PROCESS]',devices_color[name],'get_photo',name,'done',bcolors.ENDC,'err')
         return ['err','',name]
     
@@ -61,21 +59,19 @@ def image_callback(result):# input for a dict(result,mac)
     print('\t[SUB-PROCESS] recognize result:',result)
     err=[]
     if result['str']:
-        if len(result['str'])<=7:
+        if len(result['str'])<6 or len(result['str'])>7:
             err.append('length_error')
-        if '-' not in result['str']:
-            err.append('pattern_error')
     else:
         err.append('non_return')
     
     print('\t[SUB-PROCESS] recognize error:',result)
     if len(err)>0: #有錯誤的發生
         #錯誤處理
-        msg=[{'mac':result['mac']},{'error':err}]
+        msg=[{"mac":result["mac"]},{"error":err}]
     else:
-        msg=[{'mac':result['mac']},{'license_plate':result['str'],'status':'inuse'}]
-        
-    print('\t[SUB-PROCESS] Parking image type send:',result)
+        msg=[{"mac":result["mac"]},{"license_plate":result["str"],"status":"inuse"}]
+    msg=json.dumps(msg)
+    print('\t[SUB-PROCESS] Parking image type send:',msg)
     send(msg,'Parking')# update parking errors
 
     # print('recognized:',input)
@@ -97,11 +93,12 @@ async def main():
             Pool.apply_async(yolov4.detect.main,args=('output/'+result[2]+'.jpeg',),callback=print,error_callback=print)
             Pool.apply_async(testtt.recognize,args=(result[2],),callback=image_callback,error_callback=print)
         elif result[0]=='text':
-            if result[1]=='There\'s a car inside':#inuse
-                msg=[{'mac':result['mac']},{'status':'inuse'}]
+            if result[1]=='There\'s a car inside!':#inuse
+                msg=[{"mac":result[2]},{"status":"inuse"}]
             else:#empty
-                msg=[{'mac':result['mac']},{'status':'empty'}]
-                
+                msg=[{"mac":result[2]},{"status":"empty"}]
+            msg=json.dumps(msg)
+            send(msg,'Parking')
     return            #need to process
 
 
@@ -112,7 +109,7 @@ if __name__=='__main__':# main time loop
     ts=0
     while True:
         te=time.monotonic()
-        if te-ts>20 or ts==0:
+        if te-ts>15 or ts==0:
             print('[MAIN-PROCESS]-'*20)
             result=asyncio.run(main())
             
